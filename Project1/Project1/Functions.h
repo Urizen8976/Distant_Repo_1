@@ -1,7 +1,6 @@
 #pragma once
 #include <cstdio>
 #include <string>
-using namespace std;
 #pragma warning(disable: 4996)
 
 // const char *fileName, f = fopen(fileName, "w");
