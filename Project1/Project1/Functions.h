@@ -6,7 +6,7 @@
 
 // const char *fileName, f = fopen(fileName, "w");
 // равнозначно const std::string &fileName, f = fopen(fileName.c_str(), "w");
-/*bool createFileWithRandomNumbers(const std::string &fileName, const int numbersCount, const int maxNumberValue)
+bool createFileWithRandomNumbers(const std::string &fileName, const int numbersCount, const int maxNumberValue)
 {
 	int x, i; FILE *f;
 	f = fopen(fileName.c_str(), "w");
@@ -15,29 +15,17 @@
 		return false;
 	}
 	else {
+		static std::random_device rd;
+		static std::mt19937 gen(rd());
+		std::uniform_int_distribution <int> distr(0, maxNumberValue);
 		for (i = 0; i < numbersCount; i++)
 		{
-			x = rand() % (maxNumberValue + 1); 
+			x = distr(gen);
 			fprintf(f, "%d ", x);
 		}
 		fclose(f);
 		return true;
 	}
-}*/
-bool createFileWithRandomNumbers(std::string const & filename, int const numbersCount, int const maxNumberValue) {
-	if (filename.empty() or numbersCount < 1 or maxNumberValue < 1) return false;
-
-	std::ofstream out(filename, std::ios_base::trunc);
-
-	if (not out) return false;
-
-	static std::random_device rd;
-	static std::mt19937 gen(rd());
-	std::uniform_int_distribution <int> distr(0, maxNumberValue);
-
-	for (int i = 0; i < numbersCount; i++) out << distr(gen) << "\n";
-
-	return bool(out);
 }
 //Создаёт файл со случайным массивом размера numbersCount и диапазоном значений [0, maxNumberValue].
 //Возвращает true, если файл был успешно создан.
