@@ -1,11 +1,12 @@
 #pragma once
 #include <cstdio>
 #include <string>
+#include <random>
 #pragma warning(disable: 4996)
 
 // const char *fileName, f = fopen(fileName, "w");
 // равнозначно const std::string &fileName, f = fopen(fileName.c_str(), "w");
-bool createFileWithRandomNumbers(const std::string &fileName, const int numbersCount, const int maxNumberValue)
+/*bool createFileWithRandomNumbers(const std::string &fileName, const int numbersCount, const int maxNumberValue)
 {
 	int x, i; FILE *f;
 	f = fopen(fileName.c_str(), "w");
@@ -22,6 +23,21 @@ bool createFileWithRandomNumbers(const std::string &fileName, const int numbersC
 		fclose(f);
 		return true;
 	}
+}*/
+bool createFileWithRandomNumbers(std::string const & filename, int const numbersCount, int const maxNumberValue) {
+	if (filename.empty() or numbersCount < 1 or maxNumberValue < 1) return false;
+
+	std::ofstream out(filename, std::ios_base::trunc);
+
+	if (not out) return false;
+
+	static std::random_device rd;
+	static std::mt19937 gen(rd());
+	std::uniform_int_distribution <int> distr(0, maxNumberValue);
+
+	for (int i = 0; i < numbersCount; i++) out << distr(gen) << "\n";
+
+	return bool(out);
 }
 //Создаёт файл со случайным массивом размера numbersCount и диапазоном значений [0, maxNumberValue].
 //Возвращает true, если файл был успешно создан.
@@ -210,12 +226,12 @@ void multiphaseSortFile(const std::string &fileName)
 		exit(1);
 	}
 	int index = theNearestHigherFibonacciNumberIndex("file1.txt");
-	cout << endl << "theNearestHigherFibonacciNumberIndex: " << index;
-	cout << endl << "theNearestHigherFibonacciNumber: " << fibonacci(index);
+	std::cout << std::endl << "theNearestHigherFibonacciNumberIndex: " << index;
+	std::cout << std::endl << "theNearestHigherFibonacciNumber: " << fibonacci(index);
 	int fibSmallNumberIndex = index - 2;
 	int fibBigNumberIndex = index - 1;
 	if (fibBigNumberIndex > 1)
-		fragmentation("file1.txt", "file2.txt", "file3.txt", fibonacci(fibBigNumberIndex), fibonacci(fibSmallNumberIndex));
+		fragmentation(fileName.c_str(), "file2.txt", "file3.txt", fibonacci(fibBigNumberIndex), fibonacci(fibSmallNumberIndex));
 	int flag = 0;
 	while (true)
 	{
@@ -246,7 +262,7 @@ void multiphaseSortFile(const std::string &fileName)
 	}
 	fclose(f1);
 	FILE *f2, *f3;
-	cout << endl << "flag: " << flag;
+	std::cout << std::endl << "flag: " << flag;
 	int x, y, z, d;
 	if (flag == 1) {
 		f1 = fopen(fileName.c_str(), "r");
