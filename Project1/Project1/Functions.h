@@ -4,6 +4,10 @@
 #include <random>
 #pragma warning(disable: 4996)
 
+
+// Link to the Moodle: https://moodle.tsu.ru/mod/assign/view.php?id=625145
+
+
 // const char *fileName, f = fopen(fileName, "w");
 // равнозначно const std::string &fileName, f = fopen(fileName.c_str(), "w");
 bool createFileWithRandomNumbers(const std::string &fileName, const int numbersCount, const int maxNumberValue)
