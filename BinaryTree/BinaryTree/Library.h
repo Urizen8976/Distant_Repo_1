@@ -32,6 +32,12 @@ public:
 
 	int GetAmountOfDescendants() //empty
 	{	
+		int amount = 0;
+		if (this && this->m_left)
+			amount++;
+		if (this && this->m_left)
+			amount++;
+		return amount;
 	}
 };
 
@@ -84,31 +90,7 @@ public:
 	{
 		return m_root;
 	}
-	/*
-	void Insert(int key)
-	{
-		Node** cur = &m_Root;  //настройка на корень дерева
-		while (*cur)
-		{
-			Node& node = **cur;
-			if (key < node.m_Key && node.m_Left == nullptr) //key меньше ключа текущего узла и лева€ ссылка текущего узла nullptr
-			{
-				cur = &node.m_Left; //ƒвижение по левой ветви родительского узла
-				++m_size;
-			}
-			else if (key >= node.m_Key && node.m_Right == nullptr) //key больше ключа текущего узла и права€ ссылка текущего узла nullptr
-			{
-				cur = &node.m_Right; //ƒвижение по правой ветви родительского узла
-				++m_size;
-			}
-			else
-			{
-				return; //новый узел формируетс€ по левой ветви или правой ветви
-			}
-		}
-		*cur = new Node(key);
-	}
-	*/
+
 	Node* Insert(const int key)
 	{
 		return Insert(m_root, key);
@@ -367,12 +349,12 @@ public:
 		return;
 	}
 
-	void PrintHorizontal()
+	void PrintByLevels()
 	{
-		PrintHorizontal(m_root);
+		PrintByLevels(m_root);
 	}
 
-	void PrintHorizontal(Node *subTreeRoot, const int level = 0)
+	void PrintByLevels(Node *subTreeRoot, const int level = 0)
 	{
 		using std::cout;
 		using std::endl;
@@ -384,13 +366,13 @@ public:
 			return;
 		}
 
-		PrintHorizontal(subTreeRoot->m_right, level + 1);
+		PrintByLevels(subTreeRoot->m_right, level + 1);
 
 		for (int i = 0; i < level; i++)
 			cout << "   ";
 		cout << subTreeRoot->m_key << endl;
 
-		PrintHorizontal(subTreeRoot->m_left, level + 1);
+		PrintByLevels(subTreeRoot->m_left, level + 1);
 	}
 
 	void PrintLevel(const int level)
@@ -418,22 +400,6 @@ public:
 			PrintLevel(subTreeRoot->m_right, level, currentLevel + 1);
 		}
 	}
-    /*
-	void Print() //вывод всех элементов поддерева
-	{
-		PrintTree(m_root);
-		std::cout << std::endl;
-	}
-
-	void PrintTree(Node * curr)
-	{
-		if (curr)   // ѕроверка на ненулевой указатель
-		{
-			PrintTree(curr->m_left);
-			std::cout << curr->m_key << " ";
-			PrintTree(curr->m_right);
-		}
-	}*/ 
 
 	void PrintLeaves() //empty
 	{
