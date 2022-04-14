@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <assert.h>
 #include <iostream>
 
 class Node {
@@ -79,7 +80,10 @@ public:
 	Node* GetRoot()
 	{
 		if (this->m_root == nullptr)
-				throw std::runtime_error("Ошибка: Попытка получить корень пустого дерева!");
+		{
+			assert(false && "Ошибка: Попытка получить корень пустого дерева!");
+			throw std::runtime_error("Ошибка: Попытка получить корень пустого дерева!");
+		}
 		return m_root;
 	}
 
@@ -102,7 +106,7 @@ public:
 
 	bool IsEmpty()
 	{
-		if (this->GetRoot() == nullptr)
+		if (this->m_root == nullptr)
 			return true;
 		else
 			return false;
@@ -172,7 +176,9 @@ public:
 	int GetMaxKey(Node* subTreeRoot)
 	{
 		if (subTreeRoot == nullptr)
-			return;
+		{
+			return 0;
+		}
 
 		int subTreeRootMaxKey = subTreeRoot->GetKey();
 		if (subTreeRoot->m_left)
@@ -200,7 +206,9 @@ public:
 	int GetMinKey(Node* subTreeRoot)
 	{
 		if (subTreeRoot == nullptr)
-			return;
+		{
+			return 0;
+		}
 
 		int subTreeRootMinKey = subTreeRoot->GetKey();
 		if (subTreeRoot->m_left)
@@ -315,13 +323,13 @@ public:
 
 	bool EraseByKey(int key)
 	{
-		EraseByKey(m_root, key);
+		return EraseByKey(m_root, key);
 	}
 
 	bool EraseByKey(Node* subTreeRoot, int key)
 	{
 		Node* nodeToDelete = FindByKey(subTreeRoot, key);
-		Erase(nodeToDelete);
+		return Erase(nodeToDelete);
 	}
 
 	bool Erase(Node* nodeToDelete)
@@ -422,11 +430,8 @@ public:
 				parentOfLeaf->m_left = rightDescendant;
 				return true;
 			}
-
-			delete nodeToDelete;
-
-			return true;
 		}
+		return false;
 	}
 
 	bool CheckForBalance() 
@@ -591,33 +596,29 @@ public:
 		PrintTreeByLevels(subTreeRoot->m_left, level + 1);
 	}
 
-	void PrintLevel(const int level)
+	void PrintLevel(int &amountOfX, const int level)
 	{
-		PrintLevel(m_root, level, 0);
+		PrintLevel(m_root, amountOfX, level, 0);
 	}
 
-	void PrintLevel(Node* subTreeRoot, const int level, const int currentLevel = 0)
+	void PrintLevel(Node* subTreeRoot, int &amountOfX, const int level, const int currentLevel = 0)
 	{
 		using std::cout;
 		using std::endl;
 
-		if (subTreeRoot == nullptr && currentLevel == 0) {
-			if (subTreeRoot == m_root) 
+		if (subTreeRoot == nullptr) {
+			if (subTreeRoot == m_root)
 				cout << "Tree is empty" << endl;
 			return;
 		}
 
-		if (subTreeRoot == nullptr && currentLevel != 0)
-		{
-			cout << "X" << "   ";
-		}
-
 		if (currentLevel == level) {
 			cout << subTreeRoot->GetKey() << "   ";
+			++amountOfX;
 		}
 		else if (currentLevel < level) {
-			PrintLevel(subTreeRoot->m_left, level, currentLevel + 1);
-			PrintLevel(subTreeRoot->m_right, level, currentLevel + 1);
+			PrintLevel(subTreeRoot->m_left, amountOfX, level, currentLevel + 1);
+			PrintLevel(subTreeRoot->m_right, amountOfX, level, currentLevel + 1);
 		}
 	}
 
