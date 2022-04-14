@@ -1,8 +1,6 @@
 #pragma once
 #include <vector>
 #include <iostream>
-#include <random>
-#include <assert.h>
 
 class Node {
 private:
@@ -52,7 +50,7 @@ private:
 	Node * m_root = nullptr;
 
 
-private:
+public:
 	Node * CopyTree(Node* subTreeRoot)
 	{
 		Node* root = nullptr;
@@ -66,7 +64,6 @@ private:
 		return root;
 	}
 
-public:
 	BinaryTree() = default;
 	
 	BinaryTree(const BinaryTree& binaryTree)
@@ -81,17 +78,8 @@ public:
 
 	Node* GetRoot()
 	{
-		/*assert(this != nullptr);
-		try
-		{
-			if (this == nullptr)
-				throw nullptr;
-		}
-		catch (Node* i)
-		{
-			std::cout << "Ошибка: Попытка получить корень пустого дерева!" << std::endl;
-			return;
-		}*/
+		if (this->m_root == nullptr)
+				throw std::runtime_error("Ошибка: Попытка получить корень пустого дерева!");
 		return m_root;
 	}
 
@@ -399,32 +387,40 @@ public:
 			{
 				if (parent->m_left == nodeToDelete)
 				{
-					parent->m_left = nodeToDelete->m_left;
-					Node* toAdd = m_root;//Node* toAdd = GetFree(m_root);
-					if (toAdd->m_left == nullptr)
-						toAdd->m_left = nodeToDelete->m_right;
-					else
-						toAdd->m_right = nodeToDelete->m_right;
+					Node* rightDescendant = nodeToDelete->m_right;
+					Node* leftDescendant = nodeToDelete->m_left;
+					delete nodeToDelete;
+					parent->m_left = leftDescendant;
+					Node* parentOfLeaf = leftDescendant;
+					while (parentOfLeaf->m_left != nullptr)
+						parentOfLeaf = parentOfLeaf->m_left;
+					parentOfLeaf->m_left = rightDescendant;
+					return true;
 				}
-
-				if (parent->m_right == nodeToDelete)
+				else if (parent->m_right == nodeToDelete)
 				{
-					parent->m_right = nodeToDelete->m_right;
-					Node* toAdd = m_root;//Node* toAdd = GetFree(m_root);
-					if (toAdd->m_left == nullptr)
-						toAdd->m_left = nodeToDelete->m_left;
-					else
-						toAdd->m_right = nodeToDelete->m_left;
+					Node* rightDescendant = nodeToDelete->m_right;
+					Node* leftDescendant = nodeToDelete->m_left;
+					delete nodeToDelete;
+					parent->m_right = leftDescendant;
+					Node* parentOfLeaf = leftDescendant;
+					while (parentOfLeaf->m_left != nullptr)
+						parentOfLeaf = parentOfLeaf->m_left;
+					parentOfLeaf->m_left = rightDescendant;
+					return true;
 				}
 			}
 			else
 			{
-				m_root = nodeToDelete->m_left;
-				Node* toAdd = m_root;//Node* toAdd = GetFree(m_root);
-				if (toAdd->m_left == nullptr)
-					toAdd->m_left = nodeToDelete->m_right;
-				else
-					toAdd->m_right = nodeToDelete->m_right;
+				Node* rightDescendant = nodeToDelete->m_right;
+				Node* leftDescendant = nodeToDelete->m_left;
+				delete nodeToDelete;
+				m_root = leftDescendant;
+				Node* parentOfLeaf = m_root;
+				while (parentOfLeaf->m_left != nullptr)
+					parentOfLeaf = parentOfLeaf->m_left;
+				parentOfLeaf->m_left = rightDescendant;
+				return true;
 			}
 
 			delete nodeToDelete;
@@ -460,10 +456,10 @@ public:
 			return -1;
 		}
 
-		int summa = 0;
+		int sum = 0;
 		std::vector<Node*> currentLevelNodes;
 		currentLevelNodes.push_back(subTreeRoot);
-		summa += subTreeRoot->GetKey();
+		sum += subTreeRoot->GetKey();
 
 		while (currentLevelNodes.size() != 0)
 		{
@@ -473,19 +469,19 @@ public:
 			for (Node* node : currentLevelNodes) {
 				if (node->m_left) {
 					nextLevelNodes.push_back(node->m_left);
-					summa += node->m_left->GetKey();
+					sum += node->m_left->GetKey();
 				}
 
 				if (node->m_right) {
 					nextLevelNodes.push_back(node->m_right);
-					summa += node->m_right->GetKey();
+					sum += node->m_right->GetKey();
 				}
 			}
 
 			currentLevelNodes.swap(nextLevelNodes);
 		}
 
-		return summa;
+		return sum;
 	}
 
 	int GetLevelOfNodeByKey(int key) 
@@ -605,11 +601,15 @@ public:
 		using std::cout;
 		using std::endl;
 
-		if (subTreeRoot == nullptr) {
-			if (subTreeRoot == m_root) {
+		if (subTreeRoot == nullptr && currentLevel == 0) {
+			if (subTreeRoot == m_root) 
 				cout << "Tree is empty" << endl;
-			}
 			return;
+		}
+
+		if (subTreeRoot == nullptr && currentLevel != 0)
+		{
+			cout << "X" << "   ";
 		}
 
 		if (currentLevel == level) {
@@ -641,6 +641,8 @@ public:
 
 	BinaryTree operator=(const BinaryTree& binaryTree)
 	{
+		if (&binaryTree == this) 
+			return *this;
 		DeleteSubTree(m_root);
 		m_root = CopyTree(binaryTree.m_root);
 		return *this;
