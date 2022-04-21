@@ -52,6 +52,20 @@ private:
 
 
 public:
+	/*Node * CopyTree(Node* subTreeRoot)
+	{
+		BinaryTree bintr;
+		bintr.copytree();
+		Node* root = nullptr;
+		if (subTreeRoot)
+		{
+			root = new Node(subTreeRoot->GetKey());
+			root->m_left = CopyTree(subTreeRoot->m_left);
+			root->m_right = CopyTree(subTreeRoot->m_right);
+		}
+
+		return root;
+	}*/
 	Node * CopyTree(Node* subTreeRoot)
 	{
 		Node* root = nullptr;
@@ -235,33 +249,40 @@ public:
 
 	Node* InsertNode(Node* subTreeRoot, const int key)
 	{
-		if (subTreeRoot == nullptr) {
-			if (m_root == nullptr) {
+		if (subTreeRoot == nullptr) 
+		{
+			if (m_root == nullptr) 
+			{
 				m_root = new Node(key);
 				return m_root;
 			}
-			else {
+			else 
+			{
 				return nullptr;
 			}
 		}
-		if (subTreeRoot->m_left == nullptr) {
+		if (subTreeRoot->m_left == nullptr) 
+		{
 			subTreeRoot->m_left = new Node(key);
 			return subTreeRoot->m_left;
 		}
-		else if (subTreeRoot->m_right == nullptr) {
+		else if (subTreeRoot->m_right == nullptr) 
+		{
 			subTreeRoot->m_right = new Node(key);
 			return subTreeRoot->m_right;
 		}
-		else {
-			if (rand() % 2) {
+		else 
+		{
+			if (rand() % 2) 
+			{
 				return InsertNode(subTreeRoot->m_left, key);
 			}
-			else {
+			else 
+			{
 				return InsertNode(subTreeRoot->m_right, key);
 			}
 		}
 	}
-
     
 	Node* FindByKey(const int key)
 	{
@@ -300,9 +321,9 @@ public:
 	{
 		if (subTreeRoot)
 		{
-			if (subTreeRoot->m_left && subTreeRoot->m_right)
+			if (subTreeRoot->m_left || subTreeRoot->m_right)
 			{
-				if (subTreeRoot->m_left->GetKey() == key || subTreeRoot->m_right->GetKey() == key)
+				if ((subTreeRoot->m_left && subTreeRoot->m_left->GetKey() == key) || (subTreeRoot->m_right && subTreeRoot->m_right->GetKey() == key))
 					return subTreeRoot;
 				else
 				{
@@ -334,6 +355,10 @@ public:
 
 	bool Erase(Node* nodeToDelete)
 	{
+		if (nodeToDelete == nullptr)
+		{
+			return false;
+		}
 		if (nodeToDelete->m_left == nullptr && nodeToDelete->m_right == nullptr)
 		{
 			Node* parent = FindParentByKey(nodeToDelete->GetKey());

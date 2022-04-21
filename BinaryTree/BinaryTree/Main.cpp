@@ -6,7 +6,7 @@
 
 int main()
 {
-	BinaryTree bt;
+	/*BinaryTree bt;
 	for (int i = 0; i < 10; i++)
 		bt.InsertNode(i % 10);
 	bt.PrintTreeByLevels();
@@ -63,6 +63,23 @@ int main()
 	std::cout << std::endl;
 	std::cout << "Leaves: " << std::endl;
 	bt.PrintLeaves();
+	system("pause");
+	return 0;*/
+	int treeSize = 15;
+	BinaryTree tree;
+	for (int i = 0; i < treeSize; i++)
+	{
+		tree.InsertNode(i);
+		std::cout << tree.GetAmountOfNodes() << " " << tree.GetHeight() << std::endl;
+	}
+	std::cout << "---------------------" << std::endl;
+	for (int i = 0; i < treeSize; i++)
+	{
+		tree.EraseByKey(i);
+		std::cout << tree.GetAmountOfNodes() << " " << tree.GetHeight() << std::endl;
+	}
+	std::cout << "---------------------" << std::endl;
+	tree.PrintTreeByLevels();
 	system("pause");
 	return 0;
 }
