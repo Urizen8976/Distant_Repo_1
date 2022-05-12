@@ -6,7 +6,7 @@
 
 int main()
 {
-	/*BinaryTree bt;
+	BinaryTree bt;
 	for (int i = 0; i < 10; i++)
 		bt.InsertNode(i % 10);
 	bt.PrintTreeByLevels();
@@ -29,7 +29,12 @@ int main()
 	else
 		std::cout << "BinaryTree is not Empty" << std::endl;
 	//bt2 = bt2.CopyTree(bt.GetRoot());
-	bt2.PrintTreeByLevels();
+	//BinaryTree* btСopy = &bt2;
+	std::cout << "bt2.CopyTree(&bt)" << std::endl;
+	bt.PrintTreeByLevels();
+	BinaryTree bt3;
+	bt3 = bt3.CopyTree(&bt);
+	bt3.PrintTreeByLevels();
 	std::cout << "Height: " << bt2.GetHeight() << std::endl;
 	std::cout << "Amount Of Nodes: " << bt2.GetAmountOfNodes() << std::endl;
 	if (bt2.GetMinKey() == 0)
@@ -64,8 +69,8 @@ int main()
 	std::cout << "Leaves: " << std::endl;
 	bt.PrintLeaves();
 	system("pause");
-	return 0;*/
-	int treeSize = 15;
+	return 0;
+	/*int treeSize = 15;
 	BinaryTree tree;
 	for (int i = 0; i < treeSize; i++)
 	{
@@ -81,5 +86,5 @@ int main()
 	std::cout << "---------------------" << std::endl;
 	tree.PrintTreeByLevels();
 	system("pause");
-	return 0;
+	return 0;*/
 }

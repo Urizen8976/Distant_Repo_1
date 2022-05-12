@@ -52,31 +52,30 @@ private:
 
 
 public:
-	/*Node * CopyTree(Node* subTreeRoot)
+	Node * CopyTree(Node* const subTreeRoot)
+	{
+		Node* root = nullptr;
+		if (subTreeRoot)
+		{
+			root = new Node(subTreeRoot->GetKey());
+			root->m_left = CopyTree(subTreeRoot->m_left);
+			root->m_right = CopyTree(subTreeRoot->m_right);
+		}
+
+		return root;
+	}
+
+	BinaryTree CopyTree(BinaryTree* const subTree)
 	{
 		BinaryTree bintr;
-		bintr.copytree();
-		Node* root = nullptr;
-		if (subTreeRoot)
+		if (subTree && subTree->m_root)
 		{
-			root = new Node(subTreeRoot->GetKey());
-			root->m_left = CopyTree(subTreeRoot->m_left);
-			root->m_right = CopyTree(subTreeRoot->m_right);
+			bintr.m_root = new Node(subTree->m_root->GetKey());
+			bintr.m_root->m_left = CopyTree(subTree->m_root->m_left);
+			bintr.m_root->m_right = CopyTree(subTree->m_root->m_right);
 		}
 
-		return root;
-	}*/
-	Node * CopyTree(Node* subTreeRoot)
-	{
-		Node* root = nullptr;
-		if (subTreeRoot)
-		{
-			root = new Node(subTreeRoot->GetKey());
-			root->m_left = CopyTree(subTreeRoot->m_left);
-			root->m_right = CopyTree(subTreeRoot->m_right);
-		}
-
-		return root;
+		return bintr;
 	}
 
 	BinaryTree() = default;
@@ -106,7 +105,7 @@ public:
 		DeleteSubTree(m_root);
 	}
 
-	void DeleteSubTree(Node* subTreeRoot)
+	void DeleteSubTree(Node* const subTreeRoot)
 	{
 		if (subTreeRoot)
 		{
@@ -131,7 +130,7 @@ public:
 		return GetHeight(m_root);
 	}
 
-	int GetHeight(Node* subTreeRoot)
+	int GetHeight(Node* const subTreeRoot)
 	{
 		int height = 0;
 		if (subTreeRoot == nullptr)
@@ -169,7 +168,7 @@ public:
 		return GetAmountOfNodes(m_root);
 	}
 
-	int GetAmountOfNodes(Node* subTreeRoot)
+	int GetAmountOfNodes(Node* const subTreeRoot)
 	{
 		int amountOfNodes = 0;
 		if (subTreeRoot)
@@ -187,7 +186,7 @@ public:
 		return GetMaxKey(m_root);
 	}
 
-	int GetMaxKey(Node* subTreeRoot)
+	int GetMaxKey(Node* const subTreeRoot)
 	{
 		if (subTreeRoot == nullptr)
 		{
@@ -217,7 +216,7 @@ public:
 		return GetMinKey(m_root);
 	}
 
-	int GetMinKey(Node* subTreeRoot)
+	int GetMinKey(Node* const subTreeRoot)
 	{
 		if (subTreeRoot == nullptr)
 		{
@@ -247,7 +246,7 @@ public:
 		return InsertNode(m_root, key);
 	}
 
-	Node* InsertNode(Node* subTreeRoot, const int key)
+	Node* InsertNode(Node* const subTreeRoot, const int key)
 	{
 		if (subTreeRoot == nullptr) 
 		{
@@ -289,7 +288,7 @@ public:
 		return FindByKey(m_root, key);
 	}
 
-	Node* FindByKey(Node* subTreeRoot, int key)
+	Node* FindByKey(Node* const subTreeRoot, int key)
 	{
 		if (subTreeRoot)
 		{
@@ -317,7 +316,7 @@ public:
 		return FindParentByKey(m_root, key);
 	}
 
-	Node* FindParentByKey(Node* subTreeRoot, int key)
+	Node* FindParentByKey(Node* const subTreeRoot, int key)
 	{
 		if (subTreeRoot)
 		{
@@ -347,13 +346,13 @@ public:
 		return EraseByKey(m_root, key);
 	}
 
-	bool EraseByKey(Node* subTreeRoot, int key)
+	bool EraseByKey(Node* const subTreeRoot, int key)
 	{
 		Node* nodeToDelete = FindByKey(subTreeRoot, key);
 		return Erase(nodeToDelete);
 	}
 
-	bool Erase(Node* nodeToDelete)
+	bool Erase(Node* const nodeToDelete)
 	{
 		if (nodeToDelete == nullptr)
 		{
@@ -464,7 +463,7 @@ public:
 		return CheckForBalance(m_root);
 	}
 
-	bool CheckForBalance(Node* subTreeRoot)
+	bool CheckForBalance(Node* const subTreeRoot)
 	{
 		if (subTreeRoot == nullptr)
 			return true;
@@ -480,7 +479,7 @@ public:
 		return GetSumOfAllKeys(m_root);
 	}
 
-	int GetSumOfAllKeys(Node* subTreeRoot)
+	int GetSumOfAllKeys(Node* const subTreeRoot)
 	{
 		if (subTreeRoot == nullptr) {
 			return -1;
@@ -519,7 +518,7 @@ public:
 		return GetLevelOfNodeByKey(m_root, key);
 	}
 
-	int GetLevelOfNodeByKey(Node* subTreeRoot, int key)
+	int GetLevelOfNodeByKey(Node* const subTreeRoot, int key)
 	{
 		if (subTreeRoot == nullptr) {
 			return -1;
@@ -562,7 +561,7 @@ public:
 		return GetVectorOfAllKeys(m_root);
 	}
 
-	std::vector<int> GetVectorOfAllKeys(Node* subTreeRoot)
+	std::vector<int> GetVectorOfAllKeys(Node* const subTreeRoot)
 	{
 		if (subTreeRoot == nullptr)
 			return std::vector<int>();
@@ -600,7 +599,7 @@ public:
 		PrintTreeByLevels(m_root);
 	}
 
-	void PrintTreeByLevels(Node *subTreeRoot, const int level = 0)
+	void PrintTreeByLevels(Node* const subTreeRoot, const int level = 0)
 	{
 		using std::cout;
 		using std::endl;
@@ -626,7 +625,7 @@ public:
 		PrintLevel(m_root, amountOfX, level, 0);
 	}
 
-	void PrintLevel(Node* subTreeRoot, int &amountOfX, const int level, const int currentLevel = 0)
+	void PrintLevel(Node* const subTreeRoot, int &amountOfX, const int level, const int currentLevel = 0)
 	{
 		using std::cout;
 		using std::endl;
@@ -652,7 +651,7 @@ public:
 		return PrintLeaves(m_root);
 	}
 
-	void PrintLeaves(Node* subTreeRoot)
+	void PrintLeaves(Node* const subTreeRoot)
 	{
 		if (subTreeRoot == nullptr)
 			return;
