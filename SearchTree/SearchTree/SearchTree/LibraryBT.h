@@ -8,7 +8,7 @@ private:
 	int m_key;
 
 public:
-	Node* m_left;
+	Node * m_left;
 	Node* m_right;
 
 	Node()
@@ -35,7 +35,7 @@ public:
 	}
 
 	int GetAmountOfDescendants()
-	{	
+	{
 		int amount = 0;
 		if (m_left)
 			amount++;
@@ -47,9 +47,11 @@ public:
 
 
 class BinaryTree {
-private:
+protected: 
 	Node * m_root = nullptr;
 
+
+private:
 	Node * CopyTreePrivate(Node* subTreeRoot)
 	{
 		Node* root = nullptr;
@@ -544,32 +546,32 @@ private:
 public:
 	/*BinaryTree CopyTree(Node* const subTreeRoot)
 	{
-		BinaryTree bintr;
-		if (subTreeRoot)
-		{
-			bintr.m_root = new Node(subTreeRoot->GetKey());
-			bintr.m_root->m_left = CopyTreePrivate(subTreeRoot->m_left);
-			bintr.m_root->m_right = CopyTreePrivate(subTreeRoot->m_right);
-		}
-		return bintr;
+	BinaryTree bintr;
+	if (subTreeRoot)
+	{
+	bintr.m_root = new Node(subTreeRoot->GetKey());
+	bintr.m_root->m_left = CopyTreePrivate(subTreeRoot->m_left);
+	bintr.m_root->m_right = CopyTreePrivate(subTreeRoot->m_right);
+	}
+	return bintr;
 	}*/
 	BinaryTree CopyTree(Node& subTreeRoot)
 	{
 		BinaryTree bintr;
-			bintr.m_root = new Node(subTreeRoot.GetKey());
-			bintr.m_root->m_left = CopyTreePrivate(subTreeRoot.m_left);
-			bintr.m_root->m_right = CopyTreePrivate(subTreeRoot.m_right);
+		bintr.m_root = new Node(subTreeRoot.GetKey());
+		bintr.m_root->m_left = CopyTreePrivate(subTreeRoot.m_left);
+		bintr.m_root->m_right = CopyTreePrivate(subTreeRoot.m_right);
 		return bintr;
 	}
 
 	BinaryTree() = default;
-	
+
 	BinaryTree(const BinaryTree& binaryTree)
 	{
 		m_root = CopyTreePrivate(binaryTree.m_root);
 	}
 
-	~BinaryTree() 
+	~BinaryTree()
 	{
 		DeleteSubTreePrivate(m_root);
 	}
@@ -591,11 +593,11 @@ public:
 
 	void DeleteSubTree(Node& subTreeRoot)
 	{
-			DeleteSubTreePrivate(subTreeRoot.m_left);
-			DeleteSubTreePrivate(subTreeRoot.m_right);
-			delete &subTreeRoot;
-			if (&subTreeRoot == m_root) //do not forget about "subTreeRoot == m_root" case
-				m_root = nullptr;
+		DeleteSubTreePrivate(subTreeRoot.m_left);
+		DeleteSubTreePrivate(subTreeRoot.m_right);
+		delete &subTreeRoot;
+		if (&subTreeRoot == m_root) //do not forget about "subTreeRoot == m_root" case
+			m_root = nullptr;
 	}
 
 	bool IsEmpty()
@@ -614,7 +616,7 @@ public:
 	int GetHeight(Node& subTreeRoot)
 	{
 		int height = 0;
-	
+
 		std::vector<Node*> currentLevelNodes;
 		currentLevelNodes.push_back(&subTreeRoot);
 
@@ -650,9 +652,9 @@ public:
 	int GetAmountOfNodes(Node& subTreeRoot)
 	{
 		int amountOfNodes = 0;
-			amountOfNodes++;
-			amountOfNodes += GetAmountOfNodesPrivate(subTreeRoot.m_left);
-			amountOfNodes += GetAmountOfNodesPrivate(subTreeRoot.m_right);
+		amountOfNodes++;
+		amountOfNodes += GetAmountOfNodesPrivate(subTreeRoot.m_left);
+		amountOfNodes += GetAmountOfNodesPrivate(subTreeRoot.m_right);
 
 		return amountOfNodes;
 	}
@@ -724,41 +726,41 @@ public:
 
 	Node* InsertNode(Node& subTreeRoot, const int key)
 	{
-		if (&subTreeRoot == nullptr) 
+		if (&subTreeRoot == nullptr)
 		{
-			if (m_root == nullptr) 
+			if (m_root == nullptr)
 			{
 				m_root = new Node(key);
 				return m_root;
 			}
-			else 
+			else
 			{
 				return nullptr;
 			}
 		}
-		if (subTreeRoot.m_left == nullptr) 
+		if (subTreeRoot.m_left == nullptr)
 		{
 			subTreeRoot.m_left = new Node(key);
 			return subTreeRoot.m_left;
 		}
-		else if (subTreeRoot.m_right == nullptr) 
+		else if (subTreeRoot.m_right == nullptr)
 		{
 			subTreeRoot.m_right = new Node(key);
 			return subTreeRoot.m_right;
 		}
-		else 
+		else
 		{
-			if (rand() % 2) 
+			if (rand() % 2)
 			{
 				return InsertNodePrivate(subTreeRoot.m_left, key);
 			}
-			else 
+			else
 			{
 				return InsertNodePrivate(subTreeRoot.m_right, key);
 			}
 		}
 	}
-    
+
 	Node* FindByKey(const int key)
 	{
 		return FindByKeyPrivate(m_root, key);
@@ -786,7 +788,7 @@ public:
 
 		return nullptr;
 	}
-	
+
 	Node* FindParentByKey(const int key)
 	{
 		return FindParentByKeyPrivate(m_root, key);
@@ -934,7 +936,7 @@ public:
 		return false;
 	}
 
-	bool CheckForBalance() 
+	bool CheckForBalance()
 	{
 		return CheckForBalancePrivate(m_root);
 	}
@@ -950,7 +952,7 @@ public:
 			return false;
 	}
 
-	int GetSumOfAllKeys() 
+	int GetSumOfAllKeys()
 	{
 		return GetSumOfAllKeysPrivate(m_root);
 	}
@@ -989,7 +991,7 @@ public:
 		return sum;
 	}
 
-	int GetLevelOfNodeByKey(int key) 
+	int GetLevelOfNodeByKey(int key)
 	{
 		return GetLevelOfNodeByKeyPrivate(m_root, key);
 	}
@@ -1032,7 +1034,7 @@ public:
 		return -1;
 	}
 
-	std::vector<int> GetVectorOfAllKeys() 
+	std::vector<int> GetVectorOfAllKeys()
 	{
 		return GetVectorOfAllKeysPrivate(m_root);
 	}
@@ -1122,7 +1124,7 @@ public:
 		}
 	}
 
-	void PrintLeaves() 
+	void PrintLeaves()
 	{
 		return PrintLeavesPrivate(m_root);
 	}
@@ -1142,7 +1144,7 @@ public:
 
 	BinaryTree operator=(const BinaryTree& binaryTree)
 	{
-		if (&binaryTree == this) 
+		if (&binaryTree == this)
 			return *this;
 		DeleteSubTreePrivate(m_root);
 		m_root = CopyTreePrivate(binaryTree.m_root);
