@@ -17,7 +17,7 @@ private:
 		return root;
 	}
 
-	Node* FindByKeyPrivate(Node* const subTreeRoot, int key)
+	Node* FindByKeyPrivate(Node* const subTreeRoot, int key) override
 	{
 		if (subTreeRoot)
 		{
@@ -46,7 +46,7 @@ private:
 		return nullptr;
 	}
 
-	int GetLevelOfNodeByKeyPrivate(Node* subTreeRoot, const int key)
+	int GetLevelOfNodeByKeyPrivate(Node* subTreeRoot, const int key) override
 	{
 		if (subTreeRoot == nullptr)
 		{
@@ -83,13 +83,13 @@ private:
 		return -1;
 	}
 
-	bool EraseByKeyPrivate(Node* const subTreeRoot, int key)
+	bool EraseByKeyPrivate(Node* const subTreeRoot, int key) override
 	{
 		Node* nodeToDelete = FindByKeyPrivate(subTreeRoot, key);
 		return ErasePrivate(nodeToDelete);
 	}
 
-	bool ErasePrivate(Node* const nodeToDelete)
+	bool ErasePrivate(Node* const nodeToDelete) override
 	{
 		if (nodeToDelete == nullptr)
 		{
@@ -124,7 +124,7 @@ private:
 				parent->m_right = nodeToDelete->m_right;
 
 			if (!parent)
-				m_root = nodeToDelete->m_left;
+				m_root = nodeToDelete->m_right;
 
 			delete nodeToDelete;
 
@@ -159,24 +159,70 @@ private:
 					Node* rightDescendant = nodeToDelete->m_right;
 					Node* leftDescendant = nodeToDelete->m_left;
 					delete nodeToDelete;
-					parent->m_left = leftDescendant;
-					Node* parentOfLeaf = leftDescendant;
-					while (parentOfLeaf->m_left != nullptr)
-						parentOfLeaf = parentOfLeaf->m_left;
-					parentOfLeaf->m_left = rightDescendant;
-					return true;
+					if (leftDescendant->m_right)
+					{
+						Node* maxLeftLeafParent = leftDescendant;
+						while (maxLeftLeafParent->m_right && maxLeftLeafParent->m_right->m_right)
+							maxLeftLeafParent = maxLeftLeafParent->m_right;
+						if (maxLeftLeafParent->m_right->m_left)
+						{
+							Node* maxLeftLeaf = maxLeftLeafParent->m_right;
+							maxLeftLeafParent->m_right = maxLeftLeafParent->m_right->m_left;
+							parent->m_left = maxLeftLeaf;
+							maxLeftLeaf->m_right = rightDescendant;
+							maxLeftLeaf->m_left = leftDescendant;
+						}
+						else
+						{
+							Node* maxLeftLeaf = maxLeftLeafParent->m_right;
+							maxLeftLeafParent->m_right = nullptr;
+							parent->m_left = maxLeftLeaf;
+							maxLeftLeaf->m_right = rightDescendant;
+							maxLeftLeaf->m_left = leftDescendant;
+						}
+						return true;
+					}
+					else
+					{
+						parent->m_left = leftDescendant;
+						leftDescendant->m_right = rightDescendant;
+						return true;
+					}
 				}
 				else if (parent->m_right == nodeToDelete)
 				{
 					Node* rightDescendant = nodeToDelete->m_right;
 					Node* leftDescendant = nodeToDelete->m_left;
 					delete nodeToDelete;
-					parent->m_right = leftDescendant;
-					Node* parentOfLeaf = leftDescendant;
-					while (parentOfLeaf->m_left != nullptr)
-						parentOfLeaf = parentOfLeaf->m_left;
-					parentOfLeaf->m_left = rightDescendant;
-					return true;
+					if (leftDescendant->m_right)
+					{
+						Node* maxLeftLeafParent = leftDescendant;
+						while (maxLeftLeafParent->m_right && maxLeftLeafParent->m_right->m_right)
+							maxLeftLeafParent = maxLeftLeafParent->m_right;
+						if (maxLeftLeafParent->m_right->m_left)
+						{
+							Node* maxLeftLeaf = maxLeftLeafParent->m_right;
+							maxLeftLeafParent->m_right = maxLeftLeafParent->m_right->m_left;
+							parent->m_right = maxLeftLeaf;
+							maxLeftLeaf->m_right = rightDescendant;
+							maxLeftLeaf->m_left = leftDescendant;
+						}
+						else
+						{
+							Node* maxLeftLeaf = maxLeftLeafParent->m_right;
+							maxLeftLeafParent->m_right = nullptr;
+							parent->m_right = maxLeftLeaf;
+							maxLeftLeaf->m_right = rightDescendant;
+							maxLeftLeaf->m_left = leftDescendant;
+						}
+						return true;
+					}
+					else
+					{
+						parent->m_right = leftDescendant;
+						leftDescendant->m_right = rightDescendant;
+						return true;
+					}
 				}
 			}
 			else
@@ -184,17 +230,43 @@ private:
 				Node* rightDescendant = nodeToDelete->m_right;
 				Node* leftDescendant = nodeToDelete->m_left;
 				delete nodeToDelete;
-				m_root = leftDescendant;
-				Node* parentOfLeaf = m_root;
-				while (parentOfLeaf->m_left != nullptr)
-					parentOfLeaf = parentOfLeaf->m_left;
-				parentOfLeaf->m_left = rightDescendant;
-				return true;
+				if (leftDescendant->m_right)
+				{
+					Node* maxLeftLeafParent = leftDescendant;
+					while (maxLeftLeafParent->m_right && maxLeftLeafParent->m_right->m_right)
+						maxLeftLeafParent = maxLeftLeafParent->m_right;
+					if (maxLeftLeafParent->m_right->m_left)
+					{
+						Node* maxLeftLeaf = maxLeftLeafParent->m_right;
+						maxLeftLeafParent->m_right = maxLeftLeafParent->m_right->m_left;
+						m_root = maxLeftLeaf;
+						maxLeftLeaf->m_right = rightDescendant;
+						maxLeftLeaf->m_left = leftDescendant;
+					}
+					else
+					{
+						Node* maxLeftLeaf = maxLeftLeafParent->m_right;
+						maxLeftLeafParent->m_right = nullptr;
+						m_root = maxLeftLeaf;
+						maxLeftLeaf->m_right = rightDescendant;
+						maxLeftLeaf->m_left = leftDescendant;
+					}
+					return true;
+				}
+				else
+				{
+					m_root = leftDescendant;
+					leftDescendant->m_right = rightDescendant;
+					return true;
+				}
 			}
 		}
 		return false;
 	}
 
+
+protected:
+	SearchTree(Node * root) : BinaryTree{ root } {};
 
 
 public:
@@ -211,7 +283,7 @@ public:
 		return bintr;
 	}
 
-	int GetMinKey(Node& subTreeRoot)
+	int GetMinKey(Node& subTreeRoot) override
 	{
 		assert(&subTreeRoot != nullptr && "getMin: subTreeRoot was nullptr");
 		Node* temp = &subTreeRoot;
@@ -222,7 +294,7 @@ public:
 		return temp->GetKey();
 	}
 
-	int GetMaxKey(Node& subTreeRoot)
+	int GetMaxKey(Node& subTreeRoot) override
 	{
 		assert(&subTreeRoot != nullptr && "getMax: subTreeRoot was nullptr");
 		Node* temp = &subTreeRoot;
@@ -233,7 +305,7 @@ public:
 		return temp->GetKey();
 	}
 
-	bool InsertNode(Node& subTreeRoot, const int key)
+	bool InsertNode(Node& subTreeRoot, const int key) 
 	{
 		if (&subTreeRoot == nullptr)
 		{
@@ -276,18 +348,18 @@ public:
 		return false;
 	}
 
-	bool EraseByKey(int key)
+	bool EraseByKey(int key) override
 	{
 		return EraseByKeyPrivate(m_root, key);
 	}
 
-	bool EraseByKey(Node& subTreeRoot, int key)
+	bool EraseByKey(Node& subTreeRoot, int key) override
 	{
 		Node* nodeToDelete = FindByKeyPrivate(&subTreeRoot, key);
 		return ErasePrivate(nodeToDelete);
 	}
 
-	bool Erase(Node& nodeToDelete)
+	bool Erase(Node& nodeToDelete) override
 	{
 		if (&nodeToDelete == nullptr)
 		{
@@ -322,7 +394,7 @@ public:
 				parent->m_right = nodeToDelete.m_right;
 
 			if (!parent)
-				m_root = nodeToDelete.m_left;
+				m_root = nodeToDelete.m_right;
 
 			delete &nodeToDelete;
 
@@ -357,24 +429,70 @@ public:
 					Node* rightDescendant = nodeToDelete.m_right;
 					Node* leftDescendant = nodeToDelete.m_left;
 					delete &nodeToDelete;
-					parent->m_left = leftDescendant;
-					Node* parentOfLeaf = leftDescendant;
-					while (parentOfLeaf->m_left != nullptr)
-						parentOfLeaf = parentOfLeaf->m_left;
-					parentOfLeaf->m_left = rightDescendant;
-					return true;
+					if (leftDescendant->m_right)
+					{
+						Node* maxLeftLeafParent = leftDescendant;
+						while (maxLeftLeafParent->m_right && maxLeftLeafParent->m_right->m_right)
+							maxLeftLeafParent = maxLeftLeafParent->m_right;
+						if (maxLeftLeafParent->m_right->m_left)
+						{
+							Node* maxLeftLeaf = maxLeftLeafParent->m_right;
+							maxLeftLeafParent->m_right = maxLeftLeafParent->m_right->m_left;
+							parent->m_left = maxLeftLeaf;
+							maxLeftLeaf->m_right = rightDescendant;
+							maxLeftLeaf->m_left = leftDescendant;
+						}
+						else
+						{
+							Node* maxLeftLeaf = maxLeftLeafParent->m_right;
+							maxLeftLeafParent->m_right = nullptr;
+							parent->m_left = maxLeftLeaf;
+							maxLeftLeaf->m_right = rightDescendant;
+							maxLeftLeaf->m_left = leftDescendant;
+						}
+						return true;
+					}
+					else
+					{
+						parent->m_left = leftDescendant;
+						leftDescendant->m_right = rightDescendant;
+						return true;
+					}
 				}
 				else if (parent->m_right == &nodeToDelete)
 				{
 					Node* rightDescendant = nodeToDelete.m_right;
 					Node* leftDescendant = nodeToDelete.m_left;
 					delete &nodeToDelete;
-					parent->m_right = leftDescendant;
-					Node* parentOfLeaf = leftDescendant;
-					while (parentOfLeaf->m_left != nullptr)
-						parentOfLeaf = parentOfLeaf->m_left;
-					parentOfLeaf->m_left = rightDescendant;
-					return true;
+					if (leftDescendant->m_right)
+					{
+						Node* maxLeftLeafParent = leftDescendant;
+						while (maxLeftLeafParent->m_right && maxLeftLeafParent->m_right->m_right)
+							maxLeftLeafParent = maxLeftLeafParent->m_right;
+						if (maxLeftLeafParent->m_right->m_left)
+						{
+							Node* maxLeftLeaf = maxLeftLeafParent->m_right;
+							maxLeftLeafParent->m_right = maxLeftLeafParent->m_right->m_left;
+							parent->m_right = maxLeftLeaf;
+							maxLeftLeaf->m_right = rightDescendant;
+							maxLeftLeaf->m_left = leftDescendant;
+						}
+						else
+						{
+							Node* maxLeftLeaf = maxLeftLeafParent->m_right;
+							maxLeftLeafParent->m_right = nullptr;
+							parent->m_right = maxLeftLeaf;
+							maxLeftLeaf->m_right = rightDescendant;
+							maxLeftLeaf->m_left = leftDescendant;
+						}
+						return true;
+					}
+					else
+					{
+						parent->m_right = leftDescendant;
+						leftDescendant->m_right = rightDescendant;
+						return true;
+					}
 				}
 			}
 			else
@@ -382,23 +500,46 @@ public:
 				Node* rightDescendant = nodeToDelete.m_right;
 				Node* leftDescendant = nodeToDelete.m_left;
 				delete &nodeToDelete;
-				m_root = leftDescendant;
-				Node* parentOfLeaf = m_root;
-				while (parentOfLeaf->m_left != nullptr)
-					parentOfLeaf = parentOfLeaf->m_left;
-				parentOfLeaf->m_left = rightDescendant;
-				return true;
+				if (leftDescendant->m_right)
+				{
+					Node* maxLeftLeafParent = leftDescendant;
+					while (maxLeftLeafParent->m_right && maxLeftLeafParent->m_right->m_right)
+						maxLeftLeafParent = maxLeftLeafParent->m_right;
+					if (maxLeftLeafParent->m_right->m_left)
+					{
+						Node* maxLeftLeaf = maxLeftLeafParent->m_right;
+						maxLeftLeafParent->m_right = maxLeftLeafParent->m_right->m_left;
+						m_root = maxLeftLeaf;
+						maxLeftLeaf->m_right = rightDescendant;
+						maxLeftLeaf->m_left = leftDescendant;
+					}
+					else
+					{
+						Node* maxLeftLeaf = maxLeftLeafParent->m_right;
+						maxLeftLeafParent->m_right = nullptr;
+						m_root = maxLeftLeaf;
+						maxLeftLeaf->m_right = rightDescendant;
+						maxLeftLeaf->m_left = leftDescendant;
+					}
+					return true;
+				}
+				else
+				{
+					m_root = leftDescendant;
+					leftDescendant->m_right = rightDescendant;
+					return true;
+				}
 			}
 		}
 		return false;
 	}
 
-	Node* FindByKey(const int key)
+	Node* FindByKey(const int key) override
 	{
 		return FindByKeyPrivate(m_root, key);
 	}
 
-	Node* FindByKey(Node& subTreeRoot, int key)
+	Node* FindByKey(Node& subTreeRoot, int key) override
 	{
 		if (&subTreeRoot)
 		{
@@ -427,7 +568,7 @@ public:
 		return nullptr;
 	}
 
-	int GetLevelOfNodeByKey(Node& subTreeRoot, const int key)
+	int GetLevelOfNodeByKey(Node& subTreeRoot, const int key) override
 	{
 		if (&subTreeRoot == nullptr)
 		{
@@ -473,4 +614,72 @@ public:
 		BinaryTree::operator=(other);
 		return *this;
 	}
-};
+
+	static SearchTree BuildOptimalSearchTree(std::vector <int> const & d, std::vector <int> const & p, std::vector <int > const & q) 
+	{
+		const std::size_t n = d.size() + 1;
+		//d - keys, p - frequencies, q - intermediate frequencies, w - weights, r - indexes, c - tree price
+		if (not ((d.size() == p.size()) and (n == q.size())) or n == 1) 
+			throw std::invalid_argument("Inputs must satisfy relation: |d| = |p| = (|q| + 1) > 1");
+
+		int * const cw = new int[n * n];
+		int * const r = new int[n * n]{ 0 };
+
+		{
+			for (std::size_t i = 0; i < n; i++) cw[i * n + i] = q[i];
+		}
+
+		{
+			for (std::size_t j = 1; j < n; j++) 
+			{
+				for (std::size_t i = 0; i + j < n; i++) 
+				{
+					cw[i * n + (i + j)] = cw[i * n + (i + j - 1)] + p[(i + j - 1)] + q[(i + j)];
+				}
+			}
+		}
+
+		{
+			for (std::size_t j = 1; j < n; j++) 
+			{
+				for (std::size_t i = 0; i + j < n; i++) 
+				{
+					int min_c = cw[i*n + i] + cw[(i + j)*n + i + 1];
+					int min_k = i + 1;
+
+					for (std::size_t k = i + 1; k <= (i + j); k++) 
+					{
+						int c = cw[(k - 1)*n + i] + cw[(i + j)*n + k];
+						if (c < min_c) 
+						{
+							min_c = c; min_k = k;
+						}
+					}
+
+					cw[(i + j)*n + i] = cw[i*n + (i + j)] + min_c;
+					r[i*n + (i + j)] = min_k;
+				}
+			}
+		}
+
+		Node * const root = BuildRecursively(0, n - 1, r, d);
+
+		delete[] r;
+		delete[] cw;
+
+		return SearchTree{ root };
+	}
+
+	static Node * BuildRecursively(int i, int j, int const * const r, std::vector <int> const & d) 
+	{
+		if (i >= j) return nullptr;
+		int k = r[i * (d.size() + 1) + j];
+		return 
+		{ 
+			new Node
+		    { 
+			    d[k - 1], BuildRecursively(i, k - 1, r, d), BuildRecursively(k, j, r, d)
+		    } 
+		};
+	}
+};;

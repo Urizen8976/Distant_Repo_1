@@ -6,10 +6,13 @@
 class Node {
 private:
 	int m_key;
-
-public:
 	Node * m_left;
 	Node* m_right;
+
+
+public:
+	friend class BinaryTree;
+	friend class SearchTree;
 
 	Node()
 		: m_key(0)
@@ -43,12 +46,35 @@ public:
 			amount++;
 		return amount;
 	}
+
+	Node& GetRightDescendant()
+	{
+		if (m_right == nullptr)
+		{
+			assert(false && "Ошибка: Попытка получить несуществующий правый наследник!");
+			throw std::runtime_error("Ошибка: Попытка получить несуществующий правый наследник!");
+		}
+		else
+			return *m_right;
+	}
+
+	Node& GetLeftDescendant()
+	{
+		if (m_left == nullptr)
+		{
+			assert(false && "Ошибка: Попытка получить несуществующий левый наследник!");
+			throw std::runtime_error("Ошибка: Попытка получить несуществующий левый наследник!");
+		}
+		else
+			return *m_left;
+	}
 };
 
 
 class BinaryTree {
 protected: 
 	Node * m_root = nullptr;
+	BinaryTree(Node * root) : m_root{ root } {}
 
 
 private:
@@ -210,7 +236,7 @@ private:
 		}
 	}
 
-	Node* FindByKeyPrivate(Node* const subTreeRoot, int key)
+	virtual Node* FindByKeyPrivate(Node* const subTreeRoot, int key)
 	{
 		if (subTreeRoot)
 		{
@@ -258,13 +284,13 @@ private:
 		return nullptr;
 	}
 
-	bool EraseByKeyPrivate(Node* const subTreeRoot, int key)
+	virtual bool EraseByKeyPrivate(Node* const subTreeRoot, int key)
 	{
 		Node* nodeToDelete = FindByKeyPrivate(subTreeRoot, key);
 		return ErasePrivate(nodeToDelete);
 	}
 
-	bool ErasePrivate(Node* const nodeToDelete)
+	virtual bool ErasePrivate(Node* const nodeToDelete)
 	{
 		if (nodeToDelete == nullptr)
 		{
@@ -299,7 +325,7 @@ private:
 				parent->m_right = nodeToDelete->m_right;
 
 			if (!parent)
-				m_root = nodeToDelete->m_left;
+				m_root = nodeToDelete->m_right;
 
 			delete nodeToDelete;
 
@@ -415,7 +441,7 @@ private:
 		return sum;
 	}
 
-	int GetLevelOfNodeByKeyPrivate(Node* const subTreeRoot, int key)
+	virtual int GetLevelOfNodeByKeyPrivate(Node* const subTreeRoot, int key)
 	{
 		if (subTreeRoot == nullptr) {
 			return -1;
@@ -576,14 +602,15 @@ public:
 		DeleteSubTreePrivate(m_root);
 	}
 
-	Node* GetRoot()
+	Node& GetRoot()
 	{
 		if (this->m_root == nullptr)
 		{
 			assert(false && "Ошибка: Попытка получить корень пустого дерева!");
 			throw std::runtime_error("Ошибка: Попытка получить корень пустого дерева!");
 		}
-		return m_root;
+
+		return *m_root;
 	}
 
 	void DeleteSubTree() //Сlearing the tree (deleting all nodes)
@@ -664,7 +691,7 @@ public:
 		return GetMaxKeyPrivate(m_root);
 	}
 
-	int GetMaxKey(Node& subTreeRoot)
+	virtual int GetMaxKey(Node& subTreeRoot)
 	{
 		if (&subTreeRoot == nullptr)
 		{
@@ -694,7 +721,7 @@ public:
 		return GetMinKeyPrivate(m_root);
 	}
 
-	int GetMinKey(Node& subTreeRoot)
+	virtual int GetMinKey(Node& subTreeRoot) 
 	{
 		if (&subTreeRoot == nullptr)
 		{
@@ -761,12 +788,12 @@ public:
 		}
 	}
 
-	Node* FindByKey(const int key)
+	virtual Node* FindByKey(const int key) 
 	{
 		return FindByKeyPrivate(m_root, key);
 	}
 
-	Node* FindByKey(Node& subTreeRoot, int key)
+	virtual Node* FindByKey(Node& subTreeRoot, int key)
 	{
 		if (&subTreeRoot)
 		{
@@ -819,18 +846,18 @@ public:
 		return nullptr;
 	}
 
-	bool EraseByKey(int key)
+	virtual bool EraseByKey(int key)
 	{
 		return EraseByKeyPrivate(m_root, key);
 	}
 
-	bool EraseByKey(Node& subTreeRoot, int key)
+	virtual bool EraseByKey(Node& subTreeRoot, int key)
 	{
 		Node* nodeToDelete = FindByKeyPrivate(&subTreeRoot, key);
 		return ErasePrivate(nodeToDelete);
 	}
 
-	bool Erase(Node& nodeToDelete)
+	virtual bool Erase(Node& nodeToDelete)
 	{
 		if (&nodeToDelete == nullptr)
 		{
@@ -865,7 +892,7 @@ public:
 				parent->m_right = nodeToDelete.m_right;
 
 			if (!parent)
-				m_root = nodeToDelete.m_left;
+				m_root = nodeToDelete.m_right;
 
 			delete &nodeToDelete;
 
@@ -996,7 +1023,7 @@ public:
 		return GetLevelOfNodeByKeyPrivate(m_root, key);
 	}
 
-	int GetLevelOfNodeByKey(Node& subTreeRoot, int key)
+	virtual int GetLevelOfNodeByKey(Node& subTreeRoot, int key)
 	{
 		if (&subTreeRoot == nullptr) {
 			return -1;
