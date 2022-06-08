@@ -68,6 +68,16 @@ public:
 		else
 			return *m_left;
 	}
+
+	bool HasRightDescendant()
+	{
+		return (m_right != nullptr);
+	}
+
+	bool HasLeftDescendant()
+	{
+		return (m_left != nullptr);
+	}
 };
 
 
@@ -97,7 +107,7 @@ private:
 		{
 			DeleteSubTreePrivate(subTreeRoot->m_left);
 			DeleteSubTreePrivate(subTreeRoot->m_right);
-			delete &subTreeRoot;
+			delete subTreeRoot;
 			if (subTreeRoot == m_root) //do not forget about "subTreeRoot == m_root" case
 				m_root = nullptr;
 		}
@@ -284,7 +294,7 @@ private:
 		return nullptr;
 	}
 
-	virtual bool EraseByKeyPrivate(Node* const subTreeRoot, int key)
+	bool EraseByKeyPrivate(Node* const subTreeRoot, int key)
 	{
 		Node* nodeToDelete = FindByKeyPrivate(subTreeRoot, key);
 		return ErasePrivate(nodeToDelete);
@@ -570,17 +580,6 @@ private:
 
 
 public:
-	/*BinaryTree CopyTree(Node* const subTreeRoot)
-	{
-	BinaryTree bintr;
-	if (subTreeRoot)
-	{
-	bintr.m_root = new Node(subTreeRoot->GetKey());
-	bintr.m_root->m_left = CopyTreePrivate(subTreeRoot->m_left);
-	bintr.m_root->m_right = CopyTreePrivate(subTreeRoot->m_right);
-	}
-	return bintr;
-	}*/
 	BinaryTree CopyTree(Node& subTreeRoot)
 	{
 		BinaryTree bintr;
@@ -846,12 +845,12 @@ public:
 		return nullptr;
 	}
 
-	virtual bool EraseByKey(int key)
+	bool EraseByKey(int key)
 	{
 		return EraseByKeyPrivate(m_root, key);
 	}
 
-	virtual bool EraseByKey(Node& subTreeRoot, int key)
+	bool EraseByKey(Node& subTreeRoot, int key)
 	{
 		Node* nodeToDelete = FindByKeyPrivate(&subTreeRoot, key);
 		return ErasePrivate(nodeToDelete);

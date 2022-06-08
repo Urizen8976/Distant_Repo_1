@@ -4,6 +4,49 @@
 class SearchTree : public BinaryTree
 {
 private:
+	bool InsertNodePrivate(Node* const subTreeRoot, const int key)
+	{
+		if (subTreeRoot == nullptr)
+		{
+			if (subTreeRoot == m_root)
+			{
+				m_root = new Node(key);
+				return true;
+			}
+			return false;
+		}
+		Node* temp = subTreeRoot;
+		while (true)
+		{
+			while (key < temp->GetKey())
+			{
+				if (temp->m_left)
+				{
+					temp = temp->m_left;
+				}
+				else if (key < temp->GetKey())
+				{
+					temp->m_left = new Node(key);
+					return true;
+				}
+			}
+
+			while (key >= temp->GetKey())
+			{
+				if (temp->m_right)
+				{
+					temp = temp->m_right;
+				}
+				else if (key >= temp->GetKey())
+				{
+					temp->m_right = new Node(key);
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	Node * CopyTreePrivate(Node* subTreeRoot)
 	{
 		Node* root = nullptr;
@@ -81,12 +124,6 @@ private:
 			}
 		}
 		return -1;
-	}
-
-	bool EraseByKeyPrivate(Node* const subTreeRoot, int key) override
-	{
-		Node* nodeToDelete = FindByKeyPrivate(subTreeRoot, key);
-		return ErasePrivate(nodeToDelete);
 	}
 
 	bool ErasePrivate(Node* const nodeToDelete) override
@@ -305,7 +342,14 @@ public:
 		return temp->GetKey();
 	}
 
-	bool InsertNode(Node& subTreeRoot, const int key) 
+	using BinaryTree::InsertNode;
+
+	bool InsertNode(const int key)
+	{
+		return InsertNodePrivate(m_root, key);
+	}
+
+	bool InsertNode(Node& subTreeRoot, const int key)
 	{
 		if (&subTreeRoot == nullptr)
 		{
@@ -346,17 +390,6 @@ public:
 			}
 		}
 		return false;
-	}
-
-	bool EraseByKey(int key) override
-	{
-		return EraseByKeyPrivate(m_root, key);
-	}
-
-	bool EraseByKey(Node& subTreeRoot, int key) override
-	{
-		Node* nodeToDelete = FindByKeyPrivate(&subTreeRoot, key);
-		return ErasePrivate(nodeToDelete);
 	}
 
 	bool Erase(Node& nodeToDelete) override
@@ -682,4 +715,4 @@ public:
 		    } 
 		};
 	}
-};;
+};
