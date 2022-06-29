@@ -1,142 +1,394 @@
+#include <vector>
+#include <list>
+#include <map>
 #include <iostream>
+#include <algorithm>
+#include <fstream>
 #include <string>
-#include <queue>
-#include <unordered_map>
-using namespace std;
-
+#include "set.h"
+#pragma once
 
 class HuffmanCoding
 {
 public:
 	struct HuffmanNode
 	{
-		char ch;
-		int freq;
-		HuffmanNode *left, *right;
+	public:
+		HuffmanNode(int frequency = 0,
+			Set symbols = Set(),
+			HuffmanNode* leftChild = nullptr,
+			HuffmanNode* rightChild = nullptr) :
+			frequency(frequency),
+			symbols(symbols),
+			leftChild(leftChild),
+			rightChild(rightChild)
+		{}
+
+		~HuffmanNode() = default;
+
+		int numberOfChildren() const;
+
+		Set symbols = Set();
+		int frequency = 0;
+		HuffmanNode* leftChild = nullptr;
+		HuffmanNode* rightChild = nullptr;
 	};
 
-	static HuffmanNode* getNode(char ch, int freq, HuffmanNode* left, HuffmanNode* right)
+	struct
 	{
-		HuffmanNode* Hnode = new HuffmanNode();
-
-		Hnode->ch = ch;
-		Hnode->freq = freq;
-		Hnode->left = left;
-		Hnode->right = right;
-
-		return Hnode;
-	}
-
-	struct compareHuffmanNodes
-	{
-		bool operator()(HuffmanNode* l, HuffmanNode* r)
-		{
-			return l->freq > r->freq;
+		bool operator()(HuffmanNode* first, HuffmanNode* second) const {
+			return first->frequency < second->frequency;
 		}
-	};
+	} compare;
 
-	static void encode(HuffmanNode* root, string str,
-		unordered_map<char, string> &huffmanCode)
-		//unordered_map - an associative container that contains key-value pairs with unique keys. 
-		//Search, insertion, and removal of elements have average constant-time complexity.
+
+	HuffmanCoding() = default;
+	HuffmanCoding(const HuffmanCoding& copy);
+	~HuffmanCoding();
+
+	void huffman(const string fileName,
+		const string codedName = "enfile.txt",
+		const string resultName = "defile.txt")
 	{
-		if (root == nullptr)
-			return;
-
-		if (!root->left && !root->right) {
-			huffmanCode[root->ch] = str;
-		}
-
-		encode(root->left, str + "0", huffmanCode);
-		encode(root->right, str + "1", huffmanCode);
-	}
-
-	static void decode(HuffmanNode* root, int &index, string str)
-	{
-		if (root == nullptr) {
-			return;
-		}	
-
-		if (!root->left && !root->right)
-		{
-			cout << root->ch;
-			return;
-		}
-
-		index++;
-
-		if (str[index] == '0')
-			decode(root->left, index, str);
+		HuffmanCoding hc;
+		hc.build(fileName);
+		cout << hc.encode(fileName, codedName);
+		if (hc.decode(codedName, resultName))
+			cout << "\ntrue";
 		else
-			decode(root->right, index, str);
+			cout << "\nfalse";
 	}
 
-
-	static void buildHuffmanTree(string text)
+	void build(const string fileName)
 	{
-		unordered_map<char, int> freq;
-		for (char ch : text) {
-			freq[ch]++;
+		char character;
+		const int charactersAmount = 256;
+		int* allCharacters = new int[charactersAmount];
+		for (int i = 0; i < charactersAmount; i++) {
+			allCharacters[i] = 0;
 		}
 
-		priority_queue<HuffmanNode*, vector<HuffmanNode*>, compareHuffmanNodes> pq;
-		//priority_queue - a container adaptor that provides constant time lookup of the largest (by default) element, 
-		//at the expense of logarithmic insertion and extraction.
+		ifstream file(fileName);
 
-		for (auto pair : freq) {
-			pq.push(getNode(pair.first, pair.second, nullptr, nullptr));
+		if (!file.is_open()) {
+			cerr << "\nunable to open file";
+			return;
 		}
 
-		while (pq.size() != 1)
-		{
-			HuffmanNode *left = pq.top(); pq.pop();
-			HuffmanNode *right = pq.top();	pq.pop();
-
-			int sum = left->freq + right->freq;
-			pq.push(getNode('\0', sum, left, right));
+		while (!file.eof()) {
+			character = file.get();
+			if (!file.eof()) {
+				allCharacters[(unsigned char)character]++;
+			}
 		}
 
-		HuffmanNode* root = pq.top();
+		file.close();
 
-		unordered_map<char, string> huffmanCode;
-		if (!root->left && !root->right) encode(root, "0", huffmanCode);
-		else encode(root, "", huffmanCode);
-
-		cout << "Huffman Codes are :\n" << '\n';
-		for (auto pair : huffmanCode) {
-			cout << pair.first << " " << pair.second << '\n';
+		std::list<HuffmanNode*> nodes;
+		for (int i = 0; i < charactersAmount; i++) {
+			if (allCharacters[i]) {
+				HuffmanNode* temp = new HuffmanNode(allCharacters[i]);
+				temp->symbols.set_bit(1, i);
+				nodes.push_back(temp);
+			}
 		}
 
-		cout << "\nOriginal string was :\n" << text << '\n';
+		nodes.sort(compare);
+		std::list<HuffmanNode*>::iterator nodesIterator;
 
-		string str = "";
-		for (char ch : text) {
-			str += huffmanCode[ch];
+		while (nodes.size() > 1) {
+
+			HuffmanNode* first = nodes.front();	nodes.pop_front();
+			HuffmanNode* second = nodes.front(); nodes.pop_front();
+
+			HuffmanNode* newNode = new HuffmanNode(first->frequency + second->frequency,
+				first->symbols | second->symbols,
+				first,
+				second);
+
+			if (!nodes.size()) {
+				nodes.push_back(newNode);
+			}
+			else if (newNode->frequency <= nodes.front()->frequency) {
+				nodes.push_front(newNode);
+			}
+			else if (newNode->frequency >= nodes.back()->frequency) {
+				nodes.push_back(newNode);
+			}
+			else {
+
+				nodesIterator = nodes.begin();
+
+				for (HuffmanNode* temp : nodes) {
+					if (temp->frequency > newNode->frequency) {
+						nodes.insert(nodesIterator, newNode);
+						break;
+					}
+					advance(nodesIterator, 1);
+				}
+			}
+		}
+		m_root = nodes.front();
+	}
+
+	int encode(const string originalText, const string codedText)
+	{
+		int oldSize = m_root->frequency * 8;
+
+		map<char, BooleanVector> codes;
+		if (m_root->leftChild && m_root->rightChild) {
+			codeSymbols(m_root, codes);
+		}
+		else {
+			char symbol;
+			for (int i = 0; i < 256; i++) {
+				if (m_root->symbols[i]) {
+					symbol = (char)i;
+					break;
+				}
+			}
+			codes[symbol] = BooleanVector(1);
 		}
 
-		cout << "\nEncoded string is :\n" << str << '\n';
+		ifstream original(originalText);
+		if (!original.is_open() || original.eof()) {
+			return -1;
+		}
 
-		int index = -1;
-		cout << "\nDecoded string is: \n";
-		while (index < (int)str.size() - 1) {
-			decode(root, index, str);
-			if (!root->left && !root->right)
-				index++;
+		char symbol;
+		int newSize = 0;
+
+		ofstream coded(codedText);
+		if (!coded.is_open()) {
+			return -1;
+		}
+
+		while (!original.eof()) {
+			symbol = original.get();
+			if (!original.eof()) {
+				coded << codes[symbol];
+				newSize += codes[symbol].get_size();
+			}
+		}
+
+		original.close();
+		coded.close();
+
+		return ((double)newSize / oldSize * 100); //data compression ratio
+	}
+
+	bool decode(const string codedText, const string decodedText)
+	{
+		if (!m_root) {
+			return false;
+		}
+
+		ofstream decoded(decodedText);
+
+		if (!decoded.is_open()) {
+			return false;
+		}
+
+		ifstream coded(codedText);
+		std::vector<char> str;
+		char ch;
+		while (!coded.eof()) {
+
+			ch = coded.get();
+
+			if (!coded.eof()) {
+				str.push_back(ch);
+			}
+		}
+
+		HuffmanNode* temp = m_root;
+
+		for (auto ch : str) {
+			if (ch == '1') {
+				if (temp->rightChild) {
+					temp = temp->rightChild;
+				}
+				else {
+					decoded << temp->symbols;
+					if (m_root->rightChild) {
+						temp = m_root->rightChild;
+					}
+				}
+			}
+			else {
+				if (temp->leftChild) {
+					temp = temp->leftChild;
+				}
+				else {
+					decoded << temp->symbols;
+					if (m_root->leftChild) {
+						temp = m_root->leftChild;
+					}
+				}
+			}
+		}
+		if (m_root->leftChild || m_root->rightChild)
+			decoded << temp->symbols;
+
+		decoded.close();
+		coded.close();
+
+		return true;
+	}
+
+
+	void codeSymbols(HuffmanNode* node, map<char, BooleanVector>& codes) const
+	{
+		codeSymbols(m_root->leftChild, BooleanVector(1, 0), codes);
+		codeSymbols(m_root->rightChild, BooleanVector(1, 1), codes);
+	}
+
+	void codeSymbols(HuffmanNode* node,
+		BooleanVector code,
+		map<char, BooleanVector>& codes) const
+	{
+		if (!node) {
+			return;
+		}
+
+		if (!node->leftChild && !node->rightChild) {
+			char symbol;
+			for (int i = 0; i < 256; i++) {
+				if (node->symbols[i]) {
+					symbol = (char)i;
+					break;
+				}
+			}
+			codes[symbol] = code;
+		}
+
+		if (node->leftChild) {
+			codeSymbols(node->leftChild, code << 1, codes);
+		}
+
+		if (node->rightChild) {
+			codeSymbols(node->rightChild, (code << 1) | BooleanVector(1, 1), codes);
 		}
 	}
+
+	void copyTree(const HuffmanNode* subTreeRoot);
+	void copyNodes(const HuffmanNode* subTreeRoot, HuffmanNode* copyRoot);
+	void addLeft(HuffmanNode* subTreeRoot, const int frequency, Set symbols);
+	void addRight(HuffmanNode* subTreeRoot, const int frequency, Set symbols);
+	void deleteTree(HuffmanNode* subTreeRoot);
+
+private:
+	HuffmanNode * m_root;
 };
 
-
-
-int main()
+HuffmanCoding::HuffmanCoding(const HuffmanCoding& copy)
 {
+	copyTree(copy.m_root);
+}
+
+void HuffmanCoding::copyTree(const HuffmanNode* subTreeRoot)
+{
+	if (subTreeRoot == nullptr) {
+		return;
+	}
+
+	if (subTreeRoot == m_root) {
+		return;
+	}
+	if (m_root) {
+		deleteTree(m_root);
+	}
+
+	m_root = new HuffmanNode(subTreeRoot->frequency, subTreeRoot->symbols);
+
+	if (subTreeRoot->numberOfChildren() > 0) {
+		copyNodes(subTreeRoot, m_root);
+	}
+}
+
+void HuffmanCoding::copyNodes(const HuffmanNode* subTreeRoot, HuffmanNode* copyRoot)
+{
+	if (subTreeRoot == nullptr || copyRoot == nullptr) {
+		return;
+	}
+
+	if (subTreeRoot->leftChild) {
+		addLeft(copyRoot, subTreeRoot->leftChild->frequency, subTreeRoot->leftChild->symbols);
+		copyNodes(subTreeRoot->leftChild, copyRoot->leftChild);
+	}
+
+	if (subTreeRoot->rightChild) {
+		addRight(copyRoot, subTreeRoot->rightChild->frequency, subTreeRoot->rightChild->symbols);
+		copyNodes(subTreeRoot->rightChild, copyRoot->rightChild);
+	}
+}
+
+void HuffmanCoding::addLeft(HuffmanNode* subTreeRoot, const int frequency, Set symbols)
+{
+	if (subTreeRoot == nullptr) {
+		return;
+	}
+	if (!subTreeRoot->leftChild) {
+		subTreeRoot->leftChild = new HuffmanNode(frequency, symbols);
+	}
+}
+
+void HuffmanCoding::addRight(HuffmanNode* subTreeRoot, const int frequency, Set symbols)
+{
+	if (subTreeRoot == nullptr) {
+		return;
+	}
+	if (!subTreeRoot->rightChild) {
+		subTreeRoot->rightChild = new HuffmanNode(frequency, symbols);
+	}
+}
+
+HuffmanCoding::~HuffmanCoding()
+{
+	if (m_root) {
+		deleteTree(m_root);
+	}
+}
+
+void HuffmanCoding::deleteTree(HuffmanNode* subTreeRoot)
+{
+	if (subTreeRoot == nullptr) {
+		return;
+	}
+
+	if (subTreeRoot->leftChild) {
+		deleteTree(subTreeRoot->leftChild);
+	}
+
+	if (subTreeRoot->rightChild) {
+		deleteTree(subTreeRoot->rightChild);
+	}
+
+	if (subTreeRoot == m_root) {
+		m_root = nullptr;
+	}
+	delete subTreeRoot;
+}
+
+int HuffmanCoding::HuffmanNode::numberOfChildren() const
+{
+	int count = 0;
+	if (leftChild) {
+		count++;
+	}
+	if (rightChild) {
+		count++;
+	}
+	return count;
+}
+
+int main() {
 	setlocale(LC_ALL, "RUS");
-	string text = "aaaaa";
+	HuffmanCoding hc;
 	//1: asdasdgfads
 	//2: asdasdÙ˚‚‡‚˚Ù
 	//3: aaaaa
-	HuffmanCoding::buildHuffmanTree(text);
-	cout << "\n";
+	hc.huffman("orfile.txt");
 	system("pause");
 	return 0;
 }
