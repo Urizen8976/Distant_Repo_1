@@ -26,7 +26,7 @@ public:
 		{
 			hash = (hash + i + 4 * i * i) % size;
 		}
-		return hash;
+		return abs(hash);
 	}
 } hf1;
 
@@ -43,7 +43,7 @@ public:
 		{
 			hash = ((int)(hash * a * size) + 1) % size;
 		}
-		return hash;
+		return abs(hash);
 	}
 } hf2;
 
@@ -54,7 +54,7 @@ public:
 	//3 - hi(K) = (K mod N) + i × (1+ K mod (N – 2)) mod N;
 	int hash(int index, int key, int size) override
 	{
-		return (key % size + index * (1 + key % abs(size - 2))) % size;
+		return abs((key % size + index * (1 + key % abs(size - 2))) % size);
 	}
 } hf3;
 
@@ -156,9 +156,23 @@ HashTable<T>::~HashTable()
 template<typename T>
 bool HashTable<T>::checkElementByKey(int key)
 {
-	for (int i = 0; i < m_size; i++)
+	int index = hf->hash(1, key, m_size);
+	/*for (int i = 0; i < m_size; i++)
 	{
 		if (m_table[i].m_key == key)
+		{
+			return true;
+		}
+	}*/
+	HashCell* temp = &m_table[index];
+	if (m_table[index].m_key == key && m_table[index].m_state == filled)
+	{
+		return true;
+	}
+	while (temp->m_next != -1)
+	{
+		temp = &m_table[temp->m_next];
+		if (m_table[index].m_key == key && m_table[index].m_state == filled)
 		{
 			return true;
 		}
@@ -238,16 +252,19 @@ template<typename T>
 void HashTable<T>::replaceHashFunction(HashFunction* newHashFunction)
 {
 	hf = newHashFunction;
-	HashTable temp(m_size);
-	temp.hf = newHashFunction;
+	HashTable<T> *temp = new HashTable<T>(m_size);
+	temp->hf = newHashFunction;
+	//HashTable temp(m_size);
+	//temp.hf = newHashFunction;
 	for (int i = 0; i < m_size; i++)
 	{
 		if (m_table[i].m_state != empty)
 		{
-			temp.addElementByKey(m_table[i].m_key, m_table[i].m_value);
+			(*temp).addElementByKey(m_table[i].m_key, m_table[i].m_value);
 		}
 	}
-	*this = temp;
+	*this = (*temp);
+	delete temp;
 }
 
 template<typename T>

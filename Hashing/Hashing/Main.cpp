@@ -5,6 +5,10 @@
 int main()
 {
 	HashTable<std::string> ht(10);
+	std::cout << ht.checkElementByKey(-1);
+	while(true) ht.replaceHashFunction(&hf1);
+
+	/*HashTable<std::string> ht(10);
 
 	ht.addElementByKey(10, "All the other kids");
 	ht.addElementByKey(21, "with the pumped up kicks");
@@ -53,7 +57,7 @@ int main()
 	copy = ht1;
 
 	std::cout << "\nht1 copy: " << std::endl;
-	copy.print();
+	copy.print();*/
 
 	system("pause");
 	return 0;
