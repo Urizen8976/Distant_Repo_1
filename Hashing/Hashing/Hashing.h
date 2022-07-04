@@ -63,6 +63,29 @@ template<typename T>
 class HashTable
 {
 public:
+	enum state //enumeration - grouped set of integer constants;
+	{
+		empty,
+		filled,
+		deleted
+	};
+
+	class HashCell
+	{
+	public:
+		HashCell(int key = -1, int next = -1, T value = T(), state initialState = empty)
+		{
+			m_key = key;
+			m_next = next;
+			m_value = value;
+			m_state = initialState;
+		}
+		T m_value;
+		int m_key;
+		int m_next;
+		state m_state;
+	};
+
 	HashTable();
 	HashTable(int size);
 	HashTable(const HashTable<T>& copy);
@@ -79,26 +102,15 @@ private:
 	HashFunction * hf;
 	int m_actual_size = 0;
 	int m_size;
-	int* m_keys;
-	T* m_values;
-	enum state //enumeration - grouped set of integer constants;
-	{
-		empty,
-		filled,
-		deleted
-	} *m_states;
+	HashCell* m_table;
 };
 
 template<typename T>
 HashTable<T>::HashTable()
 {
 	m_size = 1;
-	m_keys = new int[m_size];
-	m_values = new T[m_size];
-	m_states = new state[m_size];
-	m_keys[0] = 0;
-	m_values[0] = T();
-	m_states[0] = empty;
+	m_actual_size = 0;
+	m_table = new HashCell[m_size];
 	hf = &hf2;
 }
 
@@ -106,15 +118,8 @@ template<typename T>
 HashTable<T>::HashTable(int size)
 {
 	m_size = size;
-	m_keys = new int[m_size];
-	m_values = new T[m_size];
-	m_states = new state[m_size];
-	for (int i = 0; i < m_size; i++)
-	{
-		m_keys[i] = 0;
-		m_values[i] = T();
-		m_states[i] = empty;
-	}
+	m_actual_size = 0;
+	m_table = new HashCell[m_size];
 	hf = &hf1;
 }
 
@@ -125,35 +130,19 @@ HashTable<T>::HashTable(const HashTable<T>& copy)
 	{
 		return;
 	}
-
 	if (m_size != copy.m_size)
 	{
 		m_size = copy.m_size;
-
-		if (m_keys)
-		{
-			delete[]m_keys;
-		}
-		m_keys = new int[m_size];
-
-		if (m_values)
-		{
-			delete[]m_values;
-		}
-		m_values = new T[m_size];
-
-		if (m_states)
-		{
-			delete[]m_states;
-		}
-		m_states = new bool[m_size];
+		delete[]m_table;
+		m_table = new HashNode[m_size];
 	}
-
+	m_actual_size = copy.m_actual_size;
 	for (int i = 0; i < m_size; i++)
 	{
-		m_keys[i] = copy.m_keys[i];
-		m_values[i] = copy.m_values[i];
-		m_states[i] = copy.m_states[i];
+		m_table[i].m_key = copy.m_table[i].m_key;
+		m_table[i].m_value = copy.m_table[i].m_value;
+		m_table[i].m_next = copy.m_table[i].m_next;
+		m_table[i].m_state = copy.m_table[i].m_state;
 	}
 	hf = copy.hf;
 }
@@ -161,30 +150,17 @@ HashTable<T>::HashTable(const HashTable<T>& copy)
 template<typename T>
 HashTable<T>::~HashTable()
 {
-	delete[]m_keys;
-	delete[]m_values;
-	delete[]m_states;
+	delete[]m_table;
 }
 
 template<typename T>
 bool HashTable<T>::checkElementByKey(int key)
 {
-	int index = 0;
-	int hash;
-	while (true) //Searching element, using the linear probing formula hi(key)=(h(key) + i) % M, increasing value i
+	for (int i = 0; i < m_size; i++)
 	{
-		hash = hf->hash(index, key, m_size);
-		if (m_states[hash] == empty)
-		{
-			return false;
-		}
-		else if (m_keys[hash] == key)
+		if (m_table[i].m_key == key)
 		{
 			return true;
-		}
-		else if (m_keys[hash] != key)
-		{
-			index++;
 		}
 	}
 	return false;
@@ -203,48 +179,57 @@ bool HashTable<T>::addElementByKey(int key, T value)
 	}
 
 	m_actual_size++;
-	int index = 0;
-	while (true)
+	int index = hf->hash(1, key, m_size);
+	if (m_table[index].m_state != filled)
 	{
-		int hash = hf->hash(index, key, m_size);
-		if (m_states[hash] != filled)
+		m_table[index].m_key = key;
+		m_table[index].m_value = value;
+		m_table[index].m_state = filled;
+		return true;
+	}
+	for (int i = 0; i < m_size; i++)
+	{
+		if (m_table[i].m_state != filled)
 		{
-			m_keys[hash] = key;
-			m_values[hash] = value;
-			m_states[hash] = filled;
+			m_table[i].m_key = key;
+			m_table[i].m_value = value;
+			m_table[i].m_state = filled;
+
+			HashCell* temp = &m_table[index];
+			while (temp->m_next != -1)
+			{
+				temp = &m_table[temp->m_next];
+			}
+			temp->m_next = i;
 			return true;
 		}
-		else if (m_keys[hash] != key)
-		{
-			index++;
-		}
 	}
+	return false;
 }
 
 template<typename T>
 bool HashTable<T>::deleteElementByKey(int key)
 {
+	if (!m_actual_size)
+	{
+		return false;
+	}
 	if (checkElementByKey(key))
 	{
 		m_actual_size--;
-		int index = 0;
-		while (true)
+		int index = hf->hash(1, key, m_size);
+		if (m_table[index].m_key == key)
 		{
-			int hash = hf->hash(index, key, m_size);
-			if (m_states[hash] == empty)
-			{
-				return false;
-			}
-			else if (m_keys[hash] == key)
-			{
-				m_states[hash] = deleted;
-				return true;
-			}
-			else if (m_keys[hash] != key)
-			{
-				index++;
-			}
+			m_table[index].m_state = deleted;
+			return true;
 		}
+		HashCell* temp = &m_table[index];
+		while (temp->m_key != key)
+		{
+			temp = &m_table[temp->m_next];
+		}
+		temp->m_state = deleted;
+		return true;
 	}
 	return false;
 }
@@ -257,9 +242,9 @@ void HashTable<T>::replaceHashFunction(HashFunction* newHashFunction)
 	temp.hf = newHashFunction;
 	for (int i = 0; i < m_size; i++)
 	{
-		if (m_states[i] != empty)
+		if (m_table[i].m_state != empty)
 		{
-			temp.addElementByKey(m_keys[i], m_values[i]);
+			temp.addElementByKey(m_table[i].m_key, m_table[i].m_value);
 		}
 	}
 	*this = temp;
@@ -276,29 +261,17 @@ HashTable<T>& HashTable<T>::operator=(const HashTable<T>& ht)
 	{
 		m_size = ht.m_size;
 
-		if (m_keys)
-		{
-			delete[]m_keys;
-		}
-		m_keys = new int[m_size];
-
-		if (m_values)
-		{
-			delete[]m_values;
-		}
-		m_values = new T[m_size];
-
-		if (m_states)
-		{
-			delete[]m_states;
-		}
-		m_states = new state[m_size];
+		delete[]m_table;
+		m_table = new HashCell[m_size];
 	}
+	m_actual_size = ht.m_actual_size;
+	hf = ht.hf;
 	for (int i = 0; i < m_size; i++)
 	{
-		m_keys[i] = ht.m_keys[i];
-		m_values[i] = ht.m_values[i];
-		m_states[i] = ht.m_states[i];
+		m_table[i].m_key = ht.m_table[i].m_key;
+		m_table[i].m_value = ht.m_table[i].m_value;
+		m_table[i].m_next = ht.m_table[i].m_next;
+		m_table[i].m_state = ht.m_table[i].m_state;
 	}
 	return *this;
 }
@@ -308,11 +281,11 @@ void HashTable<T>::print()
 {
 	for (int i = 0; i < m_size; i++)
 	{
-		if (m_states[i] != empty)
+		if (m_table[i].m_state != empty)
 		{
 			std::cout << "(" << i << ") ";
-			std::cout << m_keys[i] << " : '" << m_values[i] << "'";
-			std::cout << ((m_states[i] == filled) ? " filled" : " deleted");
+			std::cout << m_table[i].m_key << " : '" << m_table[i].m_value << "'";
+			std::cout << ((m_table[i].m_state == filled) ? " filled" : " deleted");
 			std::cout << std::endl;
 		}
 	}
